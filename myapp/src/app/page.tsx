@@ -20,7 +20,22 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: `create a PRD for an app that does ${input} with the following sections: Project Overview that gives a high level overview of the app for even non-technical stakeholders, Features/Requirements that detail the functionality of the app, User Flows that detail common user journeys through the app, Non-Functional Requirements that detail the non-functional requirements of the app, Page Designs for UI/UX Designers that exceptionally detail how each page should look and function, App Flows how the app should flow and function (user experience), and any other sections that are relevant. Section each off with a title and a description. Be as detailed as possible for every section.` }]
+          messages: [{ role: 'user', content: `Make a detailed PRD (Product Requirements Document) for an app that does ${input}. The PRD should have the following sections, each separated by a title using three hashtags (###) to indicate the section header. Inside each section, subheaders should use two hashtags (##) to break things down further. Be as detailed as possible, so anyone reading it—technical or non-technical—can fully understand the app. Here's the structure:
+
+Project Overview
+Explain the app in simple, clear language for non-technical stakeholders. Include the problem it solves, the target audience, and the high-level value it provides.
+Features/Requirements
+List out all the app's functionalities in detail. Include core features, optional features, and how each should behave.
+User Flows
+Map out common user journeys step-by-step, showing how users interact with the app to achieve their goals. Keep it simple yet thorough.
+Non-Functional Requirements
+Detail performance expectations, security needs, scalability requirements, compliance standards, and any other technical constraints.
+Page Designs for UI/UX Designers
+Create a detailed guide for how each app page should look and function. Include wireframe descriptions, key design elements, and interaction details for every screen.
+App Flows
+Lay out the overall app flow and user experience from start to finish. Include how pages connect, key navigation paths, and transitions.
+Additional Sections (optional)
+Add any other relevant sections, like Technical Stack, Risks/Challenges, or Launch Plan, if needed.` }]
         }),
       });
 
@@ -84,7 +99,19 @@ export default function Home() {
         <div className="mt-6">
           <h2 className="font-semibold mb-2">Response:</h2>
           <div className="p-4 bg-gray-700 rounded whitespace-pre-wrap">
-            {response.includes('</think>') ? response.split('</think>')[1] : response}
+            {response.includes('</think>') ? (
+              <>
+                <details className="mb-4">
+                  <summary className="cursor-pointer text-gray-400 hover:text-gray-300">
+                    Show AI Thinking Process
+                  </summary>
+                  <div className="mt-2 text-gray-400 pl-4 border-l border-gray-600">
+                    {response.split('</think>')[0]}
+                  </div>
+                </details>
+                {response.split('</think>')[1]}
+              </>
+            ) : response}
           </div>
         </div>
       )}

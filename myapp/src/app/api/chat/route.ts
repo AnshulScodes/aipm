@@ -6,8 +6,6 @@ const client = new HfInference(process.env.HUGGINGFACE_API_KEY);
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
-    const prompt = "Create a PRD for an app that does " + messages + "and has the following sections: Project Overview, Features/Requirements, User Stories, User Flows, Non-Functional Requirements, and any other sections that are relevant. Section each off with a title and a description.";
-
 
     // Create a TransformStream for streaming
     const stream = new TransformStream();
@@ -18,7 +16,10 @@ export async function POST(req: Request) {
     (async () => {
       try {
         const chatStream = await client.chatCompletionStream({
-          model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+          // model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+          // model: "meta-llama/Meta-Llama-3-70B-Instruct",
+          // model: "HuggingFaceH4/zephyr-7b-alpha",
+          model: "meta-llama/Meta-Llama-3-8B-Instruct",
           messages,
           parameters: {
             max_new_tokens: 2048,
