@@ -6,7 +6,6 @@ const client = new HfInference(process.env.HUGGINGFACE_API_KEY);
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
-
     // Create a TransformStream for streaming
     const stream = new TransformStream();
     const writer = stream.writable.getWriter();
