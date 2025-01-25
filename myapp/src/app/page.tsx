@@ -20,7 +20,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: 'just say hi in 50 words or more'}]
+          messages: [{ role: 'user', content: 'just say hi in 100 words or more'}]
 //           messages: [{ role: 'user', content: `Make a detailed PRD (Product Requirements Document) for an app that does ${input}. The PRD should have the following sections, each separated by a title using three hashtags (###) to indicate the section header. Inside each section, subheaders should use two hashtags (##) to break things down further. Be as detailed as possible, so anyone reading it—technical or non-technical—can fully understand the app. Here's the structure:
 
 // Project Overview
@@ -60,17 +60,17 @@ export default function Home() {
               const data = JSON.parse(line.slice(6));
               setResponse(prev => prev + (data.content || ''));
               // Send the content to nodeGen API
-              fetch('/api/nodeGen', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  prdData: data.content
-                })
-              }).catch(error => {
-                console.error('Error sending to nodeGen:', error);
-              });
+              // fetch('/api/nodeGen', {
+              //   method: 'POST',
+              //   headers: {
+              //     'Content-Type': 'application/json',
+              //   },
+              //   body: JSON.stringify({
+              //     prdData: data.content
+              //   })
+              // }).catch(error => {
+              //   console.error('Error sending to nodeGen:', error);
+              // });
             } catch (e) {
               console.error('Error parsing JSON:', e);
             }

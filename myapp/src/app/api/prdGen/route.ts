@@ -1,5 +1,6 @@
 import { HfInference } from "@huggingface/inference";
 import { NextResponse } from 'next/server';
+import axios from 'axios';
 
 const client = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
@@ -10,6 +11,7 @@ export async function POST(req: Request) {
     const stream = new TransformStream();
     const writer = stream.writable.getWriter();
     const encoder = new TextEncoder();
+    let fullResponse = '';
 
     // Start processing in the background
     (async () => {
@@ -32,10 +34,13 @@ export async function POST(req: Request) {
           if (chunk.choices && chunk.choices.length > 0) {
             const content = chunk.choices[0].delta.content;
             if (content) {
+              fullResponse += content;
               await writer.write(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
             }
           }
         }
+        await sendPRDToNodeGen(fullResponse);
+        console.log("FULL RESPONSE:", fullResponse);
       } catch (error) {
         console.error('Stream error:', error);
       } finally {
@@ -56,5 +61,21 @@ export async function POST(req: Request) {
       { error: 'Failed to generate response' },
       { status: 500 }
     );
+  }
+}
+
+async function sendPRDToNodeGen(fullResponse: string) {
+  try {
+    const nodeGenResponse = await fetch('http://localhost:3000/api/nodeGen', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ fullResponse }),
+    });
+    const nodeGenData = await nodeGenResponse.json();
+    console.log('Node Gen Response:', nodeGenData);
+  } catch (error) {
+    console.error('Error sending PRD to NodeGen:', error);
   }
 }
