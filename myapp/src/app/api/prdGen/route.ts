@@ -40,7 +40,7 @@ export async function POST(req: Request) {
           }
         }
         await sendPRDToNodeGen(fullResponse);
-        console.log("FULL RESPONSE:", fullResponse);
+        // console.log("FULL RESPONSE:", fullResponse);
       } catch (error) {
         console.error('Stream error:', error);
       } finally {
