@@ -35,7 +35,7 @@ async function generateNodes(fullResponse: string) {
 
   try {
     // Prepare the prompt for task and feature extraction
-    const prompt = `Given this PRD description, extract and list the main tasks and features:${fullResponse} Format your response as: Tasks: - Task 1 - Task 2 Features: - Feature 1 - Feature 2. DONT INCLUDE ANYTHING ELSE, ESPECIALLY NOT THE PROMPT.`;
+    const prompt = `Given this PRD description, extract and list the main tasks and features:${fullResponse}. The next thing you need to do is generate nodes for a flow chart of the app, describe each step of the process sequentially, using phrases like "then," "if," "else," and "next," clearly indicating decision points and potential outcomes, while also specifying the input and output at each stage. Format your response as: Tasks: - Task 1 - Task 2 Features: - Feature 1 - Feature 2. Flow chart stuff as said. DONT INCLUDE ANYTHING ELSE, ESPECIALLY NOT THE PROMPT.`;
 
     const response = await client.textGeneration({
       model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", 
@@ -49,10 +49,9 @@ async function generateNodes(fullResponse: string) {
     });
 
     const generatedText = response.generated_text;
-    // console.log("Generated tasks and features:", generatedText);
+    const textWithoutThinking = generatedText.split('</think>')[1];
 
-
-    return generatedText;
+    return textWithoutThinking;
 
   } catch (error) {
     console.error("Error generating nodes:", error);
