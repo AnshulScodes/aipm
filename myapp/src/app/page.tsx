@@ -1,11 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+// import { parseGraph } from '@flowcharter/parser';
 
 export default function Home() {
   const [input, setInput] = useState('');
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState('');
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,18 +62,11 @@ Add any other relevant sections, like Technical Stack, Risks/Challenges, or Laun
             try {
               const data = JSON.parse(line.slice(6));
               setResponse(prev => prev + (data.content || ''));
-              // Send the content to nodeGen API
-              // fetch('/api/nodeGen', {
-              //   method: 'POST',
-              //   headers: {
-              //     'Content-Type': 'application/json',
-              //   },
-              //   body: JSON.stringify({
-              //     prdData: data.content
-              //   })
-              // }).catch(error => {
-              //   console.error('Error sending to nodeGen:', error);
-              // });
+
+              // Call parseGraph with the data received
+              // const parsedGraph = parseGraph(data.content);
+              // console.log('Parsed Graph:', parsedGraph);
+
             } catch (e) {
               console.error('Error parsing JSON:', e);
             }
@@ -88,7 +84,9 @@ Add any other relevant sections, like Technical Stack, Risks/Challenges, or Laun
   return (
     <main className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">PRD Generator</h1>
-      
+      <div className="mb-4">
+        <p>{data ? data : "backend python data" }</p>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"

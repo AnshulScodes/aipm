@@ -40,7 +40,7 @@ export async function POST(req: Request) {
           }
         }
         await sendPRDToNodeGen(fullResponse);
-        // console.log("FULL RESPONSE:", fullResponse);
+        await sendPRDToBackend(fullResponse);
       } catch (error) {
         console.error('Stream error:', error);
       } finally {
@@ -78,4 +78,14 @@ async function sendPRDToNodeGen(fullResponse: string) {
   } catch (error) {
     console.error('Error sending PRD to NodeGen:', error);
   }
+}
+
+async function sendPRDToBackend(data: string) {
+  const response = await fetch('http://localhost:8000/api/sendData', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ data }),
+  });
 }
