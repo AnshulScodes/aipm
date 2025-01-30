@@ -81,12 +81,15 @@ Add any other relevant sections, like Technical Stack, Risks/Challenges, or Laun
     }
   };
 
+  // console.log("hello?");
+
   useEffect(() => {
-    fetch('http://localhost:8000/api/frontendDataRecieve')
-    .then(res => res.json())
-    .then(data => setData(data.message))
-    .catch(error => console.error('Error fetching data:', error));
+    fetch("http://127.0.0.1:8000/api/test")
+      .then((res) => res.json())
+      .then((data) => setData(data.message));
+      console.log("FROM BACKEND", data);
   }, []);
+
 
   return (
     <main className="max-w-4xl mx-auto p-4">

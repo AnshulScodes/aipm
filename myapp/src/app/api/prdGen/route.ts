@@ -82,7 +82,7 @@ async function sendPRDToNodeGen(fullResponse: string) {
 
 async function sendPRDToBackend(data: string) {
   try {
-    const response = await fetch('http://localhost:8000/api/backendDataRecieve', {
+    const response = await fetch('http://localhost:8000/api/prdGenData', {
       method: 'POST',
       headers: {
       'Content-Type': 'application/json',

@@ -2,7 +2,7 @@ import sys
 from fastapi import FastAPI
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
-
+from pydantic import BaseModel
 
 app = FastAPI()
 
@@ -18,23 +18,34 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+class Data(BaseModel):
+    data: dict
+
 def process_data(data: dict):
     # Process the data as needed
-    # For example, you could modify the data or extract certain fields
-    data = "skibidi"
-    processed_data = { "processed": data }  # Example processing
+    processed_data = { "processed": "skibidi" }  # Example processing
     return processed_data
 
-@app.post("/api/backendDataRecieve")
+@app.post("/api/prdGenData")
 def backend_data_receive(data: dict):
     print("Data received from prdGen script:")
     processed_data = process_data(data)  # Call the processing function
-    return frontend_data_receive(processed_data)  # Send processed data to the frontend route
+    return prdGenData(processed_data)  # Send processed data to the frontend route
 
-@app.get("/api/frontendDataRecieve")
-def frontend_data_receive(data: dict):
-    print("Data received in frontend route:")
-    return {"message": data}
+
+# @app.post("/api/GenData")
+# def prdGenData(data: dict):
+#     print("Data received in frontend route:")
+#     print(data)
+#     return {"message": data}  # Return the processed data as a response
+
+
+@app.get("/api/test")
+def prdGenData():
+    return {"message": "hi backend"}
+
+
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

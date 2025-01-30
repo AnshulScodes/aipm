@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     // Generate nodes from the full response
     const nodes = await generateNodes(fullResponse);
-    console.log('Generated nodes:', nodes); 
+    // console.log('Generated nodes:', nodes); 
     //sending nodes to frontend
     
 
