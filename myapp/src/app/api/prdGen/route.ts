@@ -81,11 +81,17 @@ async function sendPRDToNodeGen(fullResponse: string) {
 }
 
 async function sendPRDToBackend(data: string) {
-  const response = await fetch('http://localhost:8000/api/sendData', {
-    method: 'POST',
-    headers: {
+  try {
+    const response = await fetch('http://localhost:8000/api/backendDataRecieve', {
+      method: 'POST',
+      headers: {
       'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ data }),
-  });
+      },
+      body: JSON.stringify({ data }),
+    });
+    const backendData = await response.json();
+    console.log('Backend Response:', "BACKEND DATA RECIEVED WHOOOO");
+  } catch (error) {
+    console.error('Error sending PRD to Backend:', error);
+  }
 }

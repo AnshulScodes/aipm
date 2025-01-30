@@ -81,6 +81,13 @@ Add any other relevant sections, like Technical Stack, Risks/Challenges, or Laun
     }
   };
 
+  useEffect(() => {
+    fetch('http://localhost:8000/api/frontendDataRecieve')
+    .then(res => res.json())
+    .then(data => setData(data.message))
+    .catch(error => console.error('Error fetching data:', error));
+  }, []);
+
   return (
     <main className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">PRD Generator</h1>
