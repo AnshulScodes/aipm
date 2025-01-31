@@ -40,7 +40,10 @@ export async function POST(req: Request) {
           }
         }
         await sendPRDToNodeGen(fullResponse);
-        await sendPRDToBackend(fullResponse);
+        await console.log("backend?", sendPRDToBackend(fullResponse));
+        return sendPRDToBackend(fullResponse);
+
+
       } catch (error) {
         console.error('Stream error:', error);
       } finally {
@@ -90,7 +93,8 @@ async function sendPRDToBackend(data: string) {
       body: JSON.stringify({ data }),
     });
     const backendData = await response.json();
-    console.log('Backend Response:', "BACKEND DATA RECIEVED WHOOOO");
+    console.log('Backend Response:');
+    return backendData;
   } catch (error) {
     console.error('Error sending PRD to Backend:', error);
   }

@@ -4,7 +4,7 @@ import { HfInference } from "@huggingface/inference";
 export async function POST(req: Request) {
   try {
     const { fullResponse } = await req.json(); // Expecting the full response string
-    console.log('Backend Received full response'); // Log the received full response
+    // console.log('Backend Received full response'); // Log the received full response
 
     // Generate nodes from the full response
     const nodes = await generateNodes(fullResponse);
