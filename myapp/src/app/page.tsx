@@ -23,7 +23,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: 'just say hi in 100 words or more'}]
+          messages: [{ role: 'user', content: 'just say hi in 100 words or mor'}]
 //           messages: [{ role: 'user', content: `Make a detailed PRD (Product Requirements Document) for an app that does ${input}. The PRD should have the following sections, each separated by a title using three hashtags (###) to indicate the section header. Inside each section, subheaders should use two hashtags (##) to break things down further. Be as detailed as possible, so anyone reading it—technical or non-technical—can fully understand the app. Here's the structure:
 
 // Project Overview
