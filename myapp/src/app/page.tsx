@@ -10,6 +10,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState('');
 
+  let modelIsThinking = false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +24,7 @@ export default function Home() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [{ role: 'user', content: 'just say hi in 100 words or mor'}]
+          messages: [{ role: 'user', content: 'just say hi in 50 words or more'}]
 //           messages: [{ role: 'user', content: `Make a detailed PRD (Product Requirements Document) for an app that does ${input}. The PRD should have the following sections, each separated by a title using three hashtags (###) to indicate the section header. Inside each section, subheaders should use two hashtags (##) to break things down further. Be as detailed as possible, so anyone reading it—technical or non-technical—can fully understand the app. Here's the structure:
 
 // Project Overview
@@ -84,11 +85,17 @@ export default function Home() {
   // console.log("hello?");
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/test")
-      .then((res) => res.json())
-      .then((data) => setData(data.message));
-      console.log("FROM BACKEND", data);
-  }, []);
+    let hasRun = false;
+    if (modelIsThinking && !hasRun) {
+      hasRun = true;
+      fetch("http://127.0.0.1:8000/api/nodesAndEdgesGenData")
+        .then((res) => res.json())
+        .then((data) => {
+          setData(data.message);
+          console.log("FROM BACKEND", data);
+        });
+    }
+  }, [modelIsThinking]);
 
 
   return (
@@ -113,6 +120,7 @@ export default function Home() {
           className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-700"
         >
           {loading ? 'Thinking...' : 'Send'}
+          {loading ? modelIsThinking = true : modelIsThinking = false}
         </button>
       </form>
 

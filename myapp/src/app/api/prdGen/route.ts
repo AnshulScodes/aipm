@@ -40,8 +40,8 @@ export async function POST(req: Request) {
           }
         }
         await sendPRDToNodeGen(fullResponse);
-        await console.log("backend?", sendPRDToBackend(fullResponse));
-        return sendPRDToBackend(fullResponse);
+        await sendPRDToBackend(fullResponse)
+
 
 
       } catch (error) {

@@ -3,6 +3,7 @@ from fastapi import FastAPI
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+import httpx
 
 app = FastAPI()
 
@@ -21,31 +22,39 @@ app.add_middleware(
 
 # Define a Pydantic model for input validation
 class Data(BaseModel):
-    data: dict
+    message: str
 
 # Function to process data
 def process_data(data: dict):
-    # Example processing logic
-    processed_data = {"processed": "skibidi"}  # Replace with actual processing logic
+    processed_data = {"processed": "skibidi"}  
     return processed_data
 
-# Endpoint to receive data from the frontend, process it, and forward it
+
 @app.post("/api/prdGenData")
-def backend_data_receive(data: Data):
-    print("Data received from prdGen script:")
-    print(data.dict())  # Convert Pydantic object to a dictionary
+async def first_endpoint(dict: dict):
+    # Process the data as needed
+    print("Data received in first endpoint:", dict)
+    processed_data = process_data(dict)
 
-    # Process the data
-    processed_data = process_data(data.data)
-    print("Processed data:", processed_data)
+    # Send data to the second endpoint
+    async with httpx.AsyncClient() as client:
+        response = await client.post("http://localhost:8000/api/nodesAndEdgesGenData", json={"message": processed_data})
+    
 
-    # Forward the processed data to the frontend route (/api/GenData)
-    return processed_data  # Call the function directly
+    return {"status": "Data sent to second endpoint", "response": response.json()}
 
-# Test endpoint for debugging purposes
+@app.post("/api/nodesAndEdgesGenData")
+async def second_endpoint(dict: dict):
+    print("Data received in second endpoint:", dict)
+    return {"message": dict}
+
+
+
 @app.get("/api/test")
 def test_endpoint():
-    return {"message": "hi backend"}
+    return {"message": "skibidi alpha toilet sigma"}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
