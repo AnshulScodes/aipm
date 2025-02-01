@@ -39,7 +39,7 @@ export async function POST(req: Request) {
             }
           }
         }
-        await sendPRDToNodeGen(fullResponse);
+        // await sendPRDToNodeGen(fullResponse);
         await sendPRDToBackend(fullResponse)
 
 
@@ -77,7 +77,7 @@ async function sendPRDToNodeGen(fullResponse: string) {
       body: JSON.stringify({ fullResponse }),
     });
     const nodeGenData = await nodeGenResponse.json();
-    console.log('Node Gen Response:', nodeGenData);
+    // console.log('Node Gen Response:', nodeGenData);
   } catch (error) {
     console.error('Error sending PRD to NodeGen:', error);
   }
@@ -93,8 +93,9 @@ async function sendPRDToBackend(data: string) {
       body: JSON.stringify({ data }),
     });
     const backendData = await response.json();
-    console.log('Backend Response:');
+    // console.log('Backend Response:');
     return backendData;
+
   } catch (error) {
     console.error('Error sending PRD to Backend:', error);
   }

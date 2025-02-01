@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { parse } from 'graph-selector';
+import GraphViewer from './graphs';
 
 // import { parseGraph } from '@flowcharter/parser';
 
@@ -10,7 +12,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState('');
 
-  let modelIsThinking = false;
+  let modelThinking = false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,37 +80,40 @@ export default function Home() {
       console.error('Error:', error);
       setResponse('An error occurred while fetching the response.');
     } finally {
+      console.log("finished loading");
+      // callNodesAndEdgesGenData();
       setLoading(false);
-      useEffect(() => {
-        fetch("http://127.0.0.1:8000/api/nodesAndEdgesGenData")
-          .then((res) => res.json())
-        .then((data) => {
-          setData(data.message);
-          console.log("FROM BACKEND", data);
-        });
-      }, [modelIsThinking]);
+      const graph = parse(`
+        Node A
+          goes to: Node B
+          `);
+          
+          const { nodes, edges } = graph;
+          console.log("NODES", nodes)
+          console.log("EDGES", edges)
     }
   };
 
   // console.log("hello?");
-
-  useEffect(() => {
-    let hasRun = false;
-    if (modelIsThinking && !hasRun) {
-      hasRun = true;
-      fetch("http://127.0.0.1:8000/api/nodesAndEdgesGenData")
-        .then((res) => res.json())
-        .then((data) => {
-          setData(data.message);
-          console.log("FROM BACKEND", data);
-        });
-    }
-  }, [modelIsThinking]);
+// const callNodesAndEdgesGenData = async () => {
+//   const res = await fetch("http://127.0.0.1:8000/api/nodesAndEdgesGenData", {
+//     method: 'GET',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//   })
+//   const data = await res.json()
+//   setData(data.message)
+//   console.log("FROM BACKEND", data)
+// }
 
 
   return (
     <main className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">PRD Generator</h1>
+      <div>
+        <GraphViewer />
+      </div>
       <div className="mb-4">
         <p>{data ? data : "backend python data" }</p>
       </div>
@@ -128,7 +133,7 @@ export default function Home() {
           className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-700"
         >
           {loading ? 'Thinking...' : 'Send'}
-          {loading ? modelIsThinking = true : modelIsThinking = false}
+          {loading ? modelThinking = false : modelThinking = true}
         </button>
       </form>
 
