@@ -1,33 +1,64 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import cytoscape, { ElementsDefinition } from "cytoscape";
-import { parse, toCytoscapeElements } from "graph-selector";
+import { toCytoscapeElements } from "graph-selector";
 
 const GraphComponent: React.FC = () => {
   const cyRef = useRef<HTMLDivElement | null>(null);
+  const [elements, setElements] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
 
   useEffect(() => {
-    if (!cyRef.current) return;
+    const fetchGraphData = async () => {
+      try {
+        const response = await fetch('/api/prdGen', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            messages: [{ role: 'user', content: 'just say hi in 50 words or more' }]
+          }),
+        });
 
-    // 1. Define the graph using Graph Selector syntax
-    const graph = `
-      Node1
-        to: Node2
-      Node3
-        from: (Node1)
-      Node4
-        to: (Node1)
-    `;
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
 
-    // 2. Parse the graph data
-    const data = parse(graph);
+        if (!reader) throw new Error('No reader available');
 
-    // 3. Convert to Cytoscape elements
-    const elements = {
-        nodes: toCytoscapeElements(data).filter(el => !el.data.source),
-        edges: toCytoscapeElements(data).filter(el => el.data.source)
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          const chunk = decoder.decode(value);
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              try {
+                const data = JSON.parse(line.slice(6));
+                if (data.nodes) {
+                  const nodes = data.nodes; // Get nodes from the response
+                  setElements({
+                    nodes: toCytoscapeElements(nodes).filter(el => !el.data.source),
+                    edges: toCytoscapeElements(nodes).filter(el => el.data.source)
+                  });
+                }
+              } catch (e) {
+                console.error('Error parsing JSON:', e);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
-    // 4. Initialize Cytoscape
+    fetchGraphData();
+  }, []);
+
+  useEffect(() => {
+    if (!cyRef.current || elements.nodes.length === 0) return;
+
     const cy = cytoscape({
       container: cyRef.current,
       elements: elements as ElementsDefinition,
@@ -36,9 +67,9 @@ const GraphComponent: React.FC = () => {
           selector: "node",
           style: {
             label: "data(label)",
-            "background-color": "#0074D9",
+            "background-color": "green",
             "text-valign": "center",
-            "color": "#fff",
+            color: "#fff",
           },
         },
         {
@@ -53,8 +84,18 @@ const GraphComponent: React.FC = () => {
       layout: { name: "grid" },
     });
 
-    return () => cy.destroy(); // Cleanup Cytoscape instance on unmount
-  }, []);
+    cy.on("mouseover", "node, edge", function (evt: any) {
+      const element = evt.target;
+      const originalColor = element.style("background-color");
+      element.style({ "background-color": "#ff0000" });
+      console.log(`Hovering over: ${element.data("label")}`);
+      element.one("mouseout", function () {
+        element.style({ "background-color": originalColor });
+      });
+    });
+
+    return () => cy.destroy();
+  }, [elements]);
 
   return <div ref={cyRef} style={{ width: "100%", height: "500px" }} />;
 };

@@ -18,7 +18,6 @@ export default function Home() {
     e.preventDefault();
     setLoading(true);
     setResponse(''); // Clear previous response
-    
     try {
       const res = await fetch('/api/prdGen', {
         method: 'POST',
@@ -94,24 +93,11 @@ export default function Home() {
     }
   };
 
-  // console.log("hello?");
-// const callNodesAndEdgesGenData = async () => {
-//   const res = await fetch("http://127.0.0.1:8000/api/nodesAndEdgesGenData", {
-//     method: 'GET',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//   })
-//   const data = await res.json()
-//   setData(data.message)
-//   console.log("FROM BACKEND", data)
-// }
-
 
   return (
     <main className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">PRD Generator</h1>
-      <div>
+      <div className="mb-4 bg-blue-200 border border-gray-300 rounded-lg p-4">
         <GraphViewer />
       </div>
       <div className="mb-4">

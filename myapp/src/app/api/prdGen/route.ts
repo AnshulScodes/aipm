@@ -39,10 +39,10 @@ export async function POST(req: Request) {
             }
           }
         }
-        // await sendPRDToNodeGen(fullResponse);
-        await sendPRDToBackend(fullResponse)
 
-
+        // Call nodeGen directly and return the nodes
+        const nodes = await sendPRDToNodeGen(fullResponse);
+        await writer.write(encoder.encode(`data: ${JSON.stringify({ nodes })}\n\n`));
 
       } catch (error) {
         console.error('Stream error:', error);
@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
 async function sendPRDToNodeGen(fullResponse: string) {
   try {
-    const nodeGenResponse = await fetch('http://localhost:3000/api/test', {
+    const nodeGenResponse = await fetch('http://localhost:3000/api/nodeGen', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -77,26 +77,9 @@ async function sendPRDToNodeGen(fullResponse: string) {
       body: JSON.stringify({ fullResponse }),
     });
     const nodeGenData = await nodeGenResponse.json();
-    // console.log('Node Gen Response:', nodeGenData);
+    return nodeGenData.message; // Return the generated nodes
   } catch (error) {
     console.error('Error sending PRD to NodeGen:', error);
-  }
-}
-
-async function sendPRDToBackend(data: string) {
-  try {
-    const response = await fetch('http://localhost:8000/api/prdGenData', {
-      method: 'POST',
-      headers: {
-      'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ data }),
-    });
-    const backendData = await response.json();
-    // console.log('Backend Response:');
-    return backendData;
-
-  } catch (error) {
-    console.error('Error sending PRD to Backend:', error);
+    return [];
   }
 }

@@ -3,14 +3,10 @@ import { HfInference } from "@huggingface/inference";
 
 export async function POST(req: Request) {
   try {
-    const { fullResponse } = await req.json(); // Expecting the full response string
-    // console.log('Backend Received full response'); // Log the received full response
+    const { fullResponse } = await req.json(); 
 
     // Generate nodes from the full response
     const nodes = await generateNodes(fullResponse);
-    // console.log('Generated nodes:', nodes); 
-    //sending nodes to frontend
-    
 
     // Check if fullResponse is undefined
     if (fullResponse === undefined) {
@@ -19,10 +15,11 @@ export async function POST(req: Request) {
     }
 
     // Return the full response or process it as needed
-    return NextResponse.json({ message: 'Node generation endpoint hit successfully WE IN THE BACKEND NOW WHOO'});
+    return (NextResponse.json({ message: nodes }));
   } catch (error) {
     console.error('Error generating nodes:', error);
     return NextResponse.json(
+
       { error: 'Failed to generate nodes' },
       { status: 500 }
     );
@@ -35,7 +32,57 @@ async function generateNodes(fullResponse: string) {
 
   try {
     // Prepare the prompt for task and feature extraction
-    const prompt = `Given this PRD description, extract and list the main tasks and features:${fullResponse}. The next thing you need to do is generate nodes for a flow chart of the app, describe each step of the process sequentially, using phrases like "then," "if," "else," and "next," clearly indicating decision points and potential outcomes, while also specifying the input and output at each stage. Format your response as: Tasks: - Task 1 - Task 2 Features: - Feature 1 - Feature 2. Flow chart stuff as said. DONT INCLUDE ANYTHING ELSE, ESPECIALLY NOT THE PROMPT.`;
+    const prompt = `I need you to generate a detailed app flow in a structured format that clearly maps out every possible navigation path a user can take within this application that is outlined by this PRD: ${fullResponse}. The app flow should start at a clear entry point (e.g., “Start”) and progress step by step, ensuring that each transition is nested correctly under its respective parent node.
+
+Key Requirements:
+Strict Hierarchical Structure:
+
+Each node represents a screen or state in the app.
+Every node should have indented transitions that define the possible navigation paths a user can take.
+DO NOT create duplicate nodes at the same level; all steps must be structured within their parent node unless it’s a return path.
+Step-by-Step Navigation:
+
+Define the main app flow and how users progress through the app.
+Each step should clearly outline where users can go next and what actions trigger these transitions.
+Example format (Follow this exactly):
+yaml
+Copy
+Edit
+Start
+    to: Onboarding
+        to: HomeScreen
+            to: FeatureA
+                to: SubFeatureA1
+                to: SubFeatureA2
+            to: FeatureB
+                to: SubFeatureB1
+                to: SubFeatureB2
+        to: Settings
+            to: HomeScreen
+The hierarchy must be clear—child nodes should be properly indented under their parent nodes.
+App-Specific Flow Considerations:
+
+Ensure that your app’s core functionalities are properly represented in the flow.
+Consider the following common sections in most apps:
+Onboarding/Login (First-time user experience)
+Main Dashboard/Home (Where users land after onboarding)
+Core Features (The main tools and actions available to the user)
+Subfeatures (Breakdown of each major feature into smaller, actionable steps)
+Settings & Profile Management (User account, preferences, notifications)
+Save & Export (If applicable, where users can save/download their work)
+Navigation Loops (Users should always be able to return to the main screen)
+Every major action should have a logical next step.
+No Dead Ends or Missing Transitions:
+
+If a user reaches a final step, they should be redirected back to a logical part of the app (e.g., HomeScreen, Dashboard).
+If a setting or feature leads to a new screen, ensure there’s a way back.
+Do not leave any floating nodes without a connection back to the main app flow.
+Expected Output:
+A complete text-based app flow structure that a developer can use immediately to implement navigation logic, without additional explanations or modifications. The structure should strictly follow the defined indentation style and ensure smooth transitions between all app sections.
+
+What I need the output to be is just this list of nodes and edges in a json format, all properly indented and formatted.
+
+`;
 
     const response = await client.textGeneration({
       model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", 
@@ -49,8 +96,8 @@ async function generateNodes(fullResponse: string) {
     });
 
     const generatedText = response.generated_text;
-    const textWithoutThinking = generatedText.split('</think>')[1];
 
+    const textWithoutThinking = generatedText.split('</think>')[1];
     return textWithoutThinking;
 
   } catch (error) {
