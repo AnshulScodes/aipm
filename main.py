@@ -43,7 +43,7 @@ async def first_endpoint(dict: dict):
 
     return {"status": "Data sent to second endpoint", "response": response.json()}
 
-@app.post("/api/nodesAndEdgesGenData")
+@app.get("/api/nodesAndEdgesGenData")
 async def second_endpoint(dict: dict):
     print("Data received in second endpoint:", dict)
     return {"message": dict}

@@ -79,6 +79,14 @@ export default function Home() {
       setResponse('An error occurred while fetching the response.');
     } finally {
       setLoading(false);
+      useEffect(() => {
+        fetch("http://127.0.0.1:8000/api/nodesAndEdgesGenData")
+          .then((res) => res.json())
+        .then((data) => {
+          setData(data.message);
+          console.log("FROM BACKEND", data);
+        });
+      }, [modelIsThinking]);
     }
   };
 

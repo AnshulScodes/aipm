@@ -69,7 +69,7 @@ export async function POST(req: Request) {
 
 async function sendPRDToNodeGen(fullResponse: string) {
   try {
-    const nodeGenResponse = await fetch('http://localhost:3000/api/nodeGen', {
+    const nodeGenResponse = await fetch('http://localhost:3000/api/test', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
