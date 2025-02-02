@@ -45,7 +45,7 @@ export async function POST(req: Request) {
 
         // Call nodeGen directly and return the nodes
         const nodeGenResponse = await sendPRDToNodeGen(fullResponse);
-        // eventEmitter.emit('nodesGenerated', nodeGenResponse);
+        eventEmitter.emit('nodesGenerated', nodeGenResponse);
         await writer.write(encoder.encode(`data: ${JSON.stringify({ nodeGenResponse })}\n\n`));
 
 
@@ -83,6 +83,7 @@ async function sendPRDToNodeGen(fullResponse: string) {
     });
     const nodeGenData = await nodeGenResponse.json();
     // console.log("nodeGenData", nodeGenData)
+    // console.log("EMITTED NODESGENERATED", nodeGenData.message)
     eventEmitter.emit('nodesGenerated', nodeGenData.message);
     return nodeGenData.message; // Return the generated nodes
   } catch (error) {

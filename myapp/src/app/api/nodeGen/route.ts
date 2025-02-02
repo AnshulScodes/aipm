@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
 import { HfInference } from "@huggingface/inference";
+import { EventEmitter } from "events";
+import { Exo } from "next/font/google";
 
+let lastGeneratedNodes: any = null;
+
+const newEventEmitter = new EventEmitter();
 export async function POST(req: Request) {
   try {
     const { fullResponse } = await req.json(); 
-    console.log('fullResponse', fullResponse);
+    // console.log('fullResponse', fullResponse);
     // Generate nodes from the full response
     const nodes = await generateNodes(fullResponse);
+    lastGeneratedNodes = nodes;
+    // console.log('nodes', nodes);
+    newEventEmitter.emit('nodesGenerated', nodes);
 
-    // Check if fullResponse is undefined
+
     if (fullResponse === undefined) {
       console.error('fullResponse is undefined');
       return NextResponse.json({ error: 'fullResponse is undefined' }, { status: 400 });
@@ -24,6 +32,13 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+}
+
+export async function GET() {
+  if (!lastGeneratedNodes) {
+    return NextResponse.json({ error: 'No nodes generated yet' }, { status: 404 });
+  }
+  return NextResponse.json({ message: lastGeneratedNodes });
 }
 
 async function generateNodes(fullResponse: string) {
@@ -106,7 +121,7 @@ What I need the output to be is just this list of nodes and edges in a json form
     });
 
 
-    console.log("response", response.choices[0].message.content)
+    // console.log("response", response.choices[0].message.content)
     const generatedText = response.choices[0].message.content;
 
     // const textWithoutThinking = generatedText.split('</think>')[1];
@@ -124,3 +139,4 @@ What I need the output to be is just this list of nodes and edges in a json form
   return ['node1', 'node2', 'node3']; // Example nodes
 }
 
+export { newEventEmitter };

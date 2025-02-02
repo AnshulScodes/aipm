@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import cytoscape, { ElementsDefinition } from "cytoscape";
 import { toCytoscapeElements } from "graph-selector";
-import { eventEmitter } from './api/prdGen/route'; // Adjust the import path as necessary
+import { newEventEmitter } from './api/nodeGen/route'; // Adjust the import path as necessary
 
 const GraphComponent: React.FC = () => {
   console.log("GraphComponent is rendering"); // Debugging log
@@ -10,34 +10,53 @@ const GraphComponent: React.FC = () => {
   const [emittedData, setEmittedData] = useState<any>(null); // State to hold emitted data
 
   // Effect to listen for nodes generated event
-  useEffect(() => {
-    console.log("Setting up event listener for nodesGenerated"); // Debugging log
-    const handleNodesGenerated = (nodes: any) => {
-      console.log("Emitted Nodes:", nodes); // Log the emitted nodes to the console
-      if (nodes) { // Check if nodes is not null
-        setEmittedData(nodes); // Store the emitted nodes in state
+  // useEffect(() => {
+  //   console.log("Setting up event listener for nodesGenerated"); // Debugging log
+  //   const handleNodesGenerated = (nodes: any) => {
+  //     console.log("Emitted Nodes Received:", nodes); // Log the emitted nodes to the console
+  //     if (nodes) { // Check if nodes is not null
+  //       setEmittedData(nodes); // Store the emitted nodes in state
 
-        const cytoscapeElements = toCytoscapeElements(nodes);
-        setElements({
-          nodes: cytoscapeElements.filter(el => !el.data.source),
-          edges: cytoscapeElements.filter(el => el.data.source),
-        });
-      } else {
-        console.error("Received null or undefined nodes");
+  //       const cytoscapeElements = toCytoscapeElements(nodes);
+  //       setElements({
+  //         nodes: cytoscapeElements.filter(el => !el.data.source),
+  //         edges: cytoscapeElements.filter(el => el.data.source),
+  //       });
+  //     } else {
+  //       console.error("Received null or undefined nodes");
+  //     }
+  //   };
+
+  //   eventEmitter.on('nodesGenerated', handleNodesGenerated);
+
+  //   // Cleanup listener on unmount
+  //   return () => {
+  //     eventEmitter.off('nodesGenerated', handleNodesGenerated);
+  //   };
+  // }, []); // Empty dependency array to run only on mount
+  useEffect(() => {
+    const fetchNodes = async () => {
+      try {
+        const response = await fetch('/api/nodeGen');
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+  
+        const data = await response.json();
+        console.log("Latest nodes data:", data.message);
+      } catch (error) {
+        console.error("Error fetching nodes:", error);
       }
     };
-
-    eventEmitter.on('nodesGenerated', handleNodesGenerated);
-
-    // Cleanup listener on unmount
-    return () => {
-      eventEmitter.off('nodesGenerated', handleNodesGenerated);
-    };
+  
+    fetchNodes();
+    const interval = setInterval(fetchNodes, 5000); // Poll every 5s
+  
+    return () => clearInterval(interval);
   }, []);
-
+  
   // Effect to initialize Cytoscape
   useEffect(() => {
     if (!cyRef.current || elements.nodes.length === 0) {
+
       return;
     }
 
@@ -85,10 +104,12 @@ const GraphComponent: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center text-gray-700 text-size-2xl">
-      <h1>SKIBIDI SIGAM ALPHA</h1>
-      <div ref={cyRef} style={{ width: "100%", height: "500px" }} />
-      <h3>Generated Nodes:</h3>
+      <div>
+        <div ref={cyRef} style={{ width: "100%", height: "500px" }} />
+      </div>
+      <h3 >Generated Nodes:</h3>
       <ul>
+
         {elements.nodes.map((node) => (
           <li key={node.data.id}>{node.data.label}</li>
         ))}
