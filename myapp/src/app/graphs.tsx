@@ -1,63 +1,45 @@
 import { useEffect, useRef, useState } from "react";
 import cytoscape, { ElementsDefinition } from "cytoscape";
 import { toCytoscapeElements } from "graph-selector";
+import { eventEmitter } from './api/prdGen/route'; // Adjust the import path as necessary
 
 const GraphComponent: React.FC = () => {
+  console.log("GraphComponent is rendering"); // Debugging log
   const cyRef = useRef<HTMLDivElement | null>(null);
   const [elements, setElements] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
+  const [emittedData, setEmittedData] = useState<any>(null); // State to hold emitted data
 
+  // Effect to listen for nodes generated event
   useEffect(() => {
-    const fetchGraphData = async () => {
-      try {
-        const response = await fetch('/api/prdGen', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messages: [{ role: 'user', content: 'just say hi in 50 words or more' }]
-          }),
+    console.log("Setting up event listener for nodesGenerated"); // Debugging log
+    const handleNodesGenerated = (nodes: any) => {
+      console.log("Emitted Nodes:", nodes); // Log the emitted nodes to the console
+      if (nodes) { // Check if nodes is not null
+        setEmittedData(nodes); // Store the emitted nodes in state
+
+        const cytoscapeElements = toCytoscapeElements(nodes);
+        setElements({
+          nodes: cytoscapeElements.filter(el => !el.data.source),
+          edges: cytoscapeElements.filter(el => el.data.source),
         });
-
-        const reader = response.body?.getReader();
-        const decoder = new TextDecoder();
-
-        if (!reader) throw new Error('No reader available');
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split('\n');
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.nodes) {
-                  const nodes = data.nodes; // Get nodes from the response
-                  setElements({
-                    nodes: toCytoscapeElements(nodes).filter(el => !el.data.source),
-                    edges: toCytoscapeElements(nodes).filter(el => el.data.source)
-                  });
-                }
-              } catch (e) {
-                console.error('Error parsing JSON:', e);
-              }
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching data:", error);
+      } else {
+        console.error("Received null or undefined nodes");
       }
     };
 
-    fetchGraphData();
+    eventEmitter.on('nodesGenerated', handleNodesGenerated);
+
+    // Cleanup listener on unmount
+    return () => {
+      eventEmitter.off('nodesGenerated', handleNodesGenerated);
+    };
   }, []);
 
+  // Effect to initialize Cytoscape
   useEffect(() => {
-    if (!cyRef.current || elements.nodes.length === 0) return;
+    if (!cyRef.current || elements.nodes.length === 0) {
+      return;
+    }
 
     const cy = cytoscape({
       container: cyRef.current,
@@ -84,20 +66,37 @@ const GraphComponent: React.FC = () => {
       layout: { name: "grid" },
     });
 
-    cy.on("mouseover", "node, edge", function (evt: any) {
+    // Event listener for hover effects
+    cy.on("mouseover", "node, edge", (evt) => {
       const element = evt.target;
       const originalColor = element.style("background-color");
       element.style({ "background-color": "#ff0000" });
-      console.log(`Hovering over: ${element.data("label")}`);
-      element.one("mouseout", function () {
+
+      element.one("mouseout", () => {
         element.style({ "background-color": originalColor });
       });
     });
 
-    return () => cy.destroy();
+    // Cleanup Cytoscape instance on unmount
+    return () => {
+      cy.destroy();
+    };
   }, [elements]);
 
-  return <div ref={cyRef} style={{ width: "100%", height: "500px" }} />;
+  return (
+    <div className="flex flex-col items-center justify-center text-gray-700 text-size-2xl">
+      <h1>SKIBIDI SIGAM ALPHA</h1>
+      <div ref={cyRef} style={{ width: "100%", height: "500px" }} />
+      <h3>Generated Nodes:</h3>
+      <ul>
+        {elements.nodes.map((node) => (
+          <li key={node.data.id}>{node.data.label}</li>
+        ))}
+      </ul>
+      <h3>Emitted Data:</h3>
+      <pre>{JSON.stringify(emittedData, null, 2)}</pre> {/* Display the emitted data */}
+    </div>
+  );
 };
 
 export default GraphComponent;

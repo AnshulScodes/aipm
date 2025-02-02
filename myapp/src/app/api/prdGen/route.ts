@@ -1,6 +1,9 @@
 import { HfInference } from "@huggingface/inference";
 import { NextResponse } from 'next/server';
 import axios from 'axios';
+import { EventEmitter } from "events";
+
+const eventEmitter = new EventEmitter();
 
 const client = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
@@ -41,8 +44,10 @@ export async function POST(req: Request) {
         }
 
         // Call nodeGen directly and return the nodes
-        const nodes = await sendPRDToNodeGen(fullResponse);
-        await writer.write(encoder.encode(`data: ${JSON.stringify({ nodes })}\n\n`));
+        const nodeGenResponse = await sendPRDToNodeGen(fullResponse);
+        // eventEmitter.emit('nodesGenerated', nodeGenResponse);
+        await writer.write(encoder.encode(`data: ${JSON.stringify({ nodeGenResponse })}\n\n`));
+
 
       } catch (error) {
         console.error('Stream error:', error);
@@ -77,9 +82,14 @@ async function sendPRDToNodeGen(fullResponse: string) {
       body: JSON.stringify({ fullResponse }),
     });
     const nodeGenData = await nodeGenResponse.json();
+    // console.log("nodeGenData", nodeGenData)
+    eventEmitter.emit('nodesGenerated', nodeGenData.message);
     return nodeGenData.message; // Return the generated nodes
   } catch (error) {
     console.error('Error sending PRD to NodeGen:', error);
     return [];
   }
 }
+
+
+export { eventEmitter };

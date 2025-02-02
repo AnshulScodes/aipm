@@ -4,7 +4,7 @@ import { HfInference } from "@huggingface/inference";
 export async function POST(req: Request) {
   try {
     const { fullResponse } = await req.json(); 
-
+    console.log('fullResponse', fullResponse);
     // Generate nodes from the full response
     const nodes = await generateNodes(fullResponse);
 
@@ -84,21 +84,38 @@ What I need the output to be is just this list of nodes and edges in a json form
 
 `;
 
-    const response = await client.textGeneration({
-      model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", 
-      inputs: prompt,
-      parameters: {
-        max_new_tokens: 1024,
-        temperature: 0.2,
-        top_p: 0.95,
-        repetition_penalty: 1.15,
-      }
+    const response = await client.chatCompletion({
+      // model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B", 
+      // model: "meta-llama/Meta-Llama-3-8B-Instruct",
+      // inputs: prompt,
+      // parameters: {
+      //   max_new_tokens: 1024,
+      //   temperature: 0.2,
+      //   top_p: 0.95,
+      //   repetition_penalty: 1.15,
+      // }
+      model: "meta-llama/Llama-3.2-3B-Instruct",
+      messages: [
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      provider: "hf-inference",
+      max_tokens: 1024
     });
 
-    const generatedText = response.generated_text;
 
-    const textWithoutThinking = generatedText.split('</think>')[1];
-    return textWithoutThinking;
+    console.log("response", response.choices[0].message.content)
+    const generatedText = response.choices[0].message.content;
+
+    // const textWithoutThinking = generatedText.split('</think>')[1];
+    // console.log("nodes: ", textWithoutThinking);
+    return generatedText;
+
+
+
+
 
   } catch (error) {
     console.error("Error generating nodes:", error);

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { parse } from 'graph-selector';
-import GraphViewer from './graphs';
+import GraphComponent from './graphs';
 
 // import { parseGraph } from '@flowcharter/parser';
 
@@ -98,7 +98,7 @@ export default function Home() {
     <main className="max-w-4xl mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">PRD Generator</h1>
       <div className="mb-4 bg-blue-200 border border-gray-300 rounded-lg p-4">
-        <GraphViewer />
+        <GraphComponent />
       </div>
       <div className="mb-4">
         <p>{data ? data : "backend python data" }</p>
