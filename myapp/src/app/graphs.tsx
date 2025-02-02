@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import cytoscape, { ElementsDefinition } from "cytoscape";
 
+
 const GraphComponent: React.FC = () => {
   const cyRef = useRef<HTMLDivElement | null>(null);
   const [elements, setElements] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
@@ -10,15 +11,18 @@ const GraphComponent: React.FC = () => {
     const fetchNodes = async () => {
       try {
         const response = await fetch('/api/nodeGen');
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-  
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
         const data = await response.json();
         const nodes = data.message;
         // console.log("Latest nodes data:", nodes);
         setLatestNodes(nodes);
 
+
       } catch (error) {
         console.error("Error fetching nodes:", error);
+        setLatestNodes(""); // Set empty string on error
       }
     };
   
@@ -27,16 +31,49 @@ const GraphComponent: React.FC = () => {
   
     return () => clearInterval(interval);
   }, []);
+
+
+
+
+  console.log("Latest nodes data:", latestNodes);
+  const flowData = formatTextToNodes(latestNodes);
+  console.log("Formatted flow data:", flowData);
+
+  function formatTextToNodes(rawText: string | null) {
+    if (!rawText) return "";
+    
+    let textNoThink = rawText;
+    if (rawText.includes('</think>')) {
+      textNoThink = rawText.split('</think>')[1];
+    }
+    
+    let lines = textNoThink.replace(/\n/g, "").split("  ");
+    lines = lines.map(line => line.trim()).filter(line => line);
   
-  function cleanData(text: string | null ) {
-    if (!text) return null;
-    const match = text.match(/```(?:json)?\n([\s\S]*?)\n```/);
-    return match ? match[1] : null;
+    let formattedLines: string[] = [];
+    let indentLevel = 0;
+    let prevIndent = 0;
+  
+    for (let line of lines) {
+      let currIndent = (line.length - line.trimStart().length) / 4;
+  
+      if (currIndent > prevIndent) {
+        indentLevel++;
+      } else if (currIndent < prevIndent) {
+        indentLevel--;
+      }
+  
+      formattedLines.push("  ".repeat(indentLevel) + line.trim());
+      prevIndent = currIndent;
+  
+  
+    }
+  
+    return formattedLines.join("\n");
   }
 
 
-  const cleanedData = cleanData(latestNodes);
-  // const flowData = cleanedData ? JSON.parse(cleanedData) : null;
+
 
 
 
@@ -95,12 +132,12 @@ const GraphComponent: React.FC = () => {
       </div>
       <h3>Latest Nodes Data:</h3>
       <pre className="bg-gray-100 p-4 rounded-lg overflow-auto max-w-full">
-        {JSON.stringify(latestNodes, null, 2)}
+        {JSON.stringify(flowData, null, 2)}
       </pre>
     </div>
+
 
   );
 };
 
 export default GraphComponent;
-
