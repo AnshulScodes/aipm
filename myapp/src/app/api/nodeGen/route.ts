@@ -47,6 +47,40 @@ async function generateNodes(fullResponse: string) {
 
   try {
     // Prepare the prompt for task and feature extraction
+    const prompt3 = `Generate a quick app flow in a structured, hierarchical format that clearly maps out possible navigation paths that a user can go through based off this PRD: ${fullResponse}. The output should be hierarchical, like this: ""Start
+        Onboarding
+            HomeScreen
+                FeatureA
+                    SubFeatureA1
+                SubFeatureA2
+            FeatureB      
+                SubFeatureB1
+                SubFeatureB2
+        Settings  
+            HomeScreen"
+`
+    const prompt2 = `I need you to generate a detailed app flow in a structured, hierarchical format that clearly maps out every possible navigation path a user can take within this application that is outlined by this PRD: ${fullResponse}. The app flow should start at a clear entry point and progress step by step, ensuring that each transition is nested correctly under its respective parent node.
+    
+    The output should be hierarchical, like this:
+    "Start
+        Onboarding
+            HomeScreen
+                FeatureA
+                    SubFeatureA1
+                SubFeatureA2
+            FeatureB      
+                SubFeatureB1
+                SubFeatureB2
+        Settings  
+            HomeScreen"
+    
+    Also, make sure that the nodes are all unique and that there are no duplicate nodes at the same level. As well as that, to label arrows it should be formatted like this: "to: NodeName", and arrows will refernce nodes like this: (nodeName).
+    `
+
+
+
+
+
     const prompt = `I need you to generate a detailed app flow in a structured format that clearly maps out every possible navigation path a user can take within this application that is outlined by this PRD: ${fullResponse}. The app flow should start at a clear entry point (e.g., “Start”) and progress step by step, ensuring that each transition is nested correctly under its respective parent node.
 
 Key Requirements:
@@ -106,11 +140,11 @@ What I need the output to be is just this list of nodes and edges in a json form
       //   top_p: 0.95,
       //   repetition_penalty: 1.15,
       // }
-      model: "meta-llama/Llama-3.2-3B-Instruct",
+      model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
       messages: [
         {
           role: "user",
-          content: prompt
+          content: prompt3
         }
       ],
       provider: "hf-inference",

@@ -28,6 +28,21 @@ const GraphComponent: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
   
+  function cleanData(text: string | null ) {
+    if (!text) return null;
+    const match = text.match(/```(?:json)?\n([\s\S]*?)\n```/);
+    return match ? match[1] : null;
+  }
+
+
+  const cleanedData = cleanData(latestNodes);
+  // const flowData = cleanedData ? JSON.parse(cleanedData) : null;
+
+
+
+
+
+
   useEffect(() => {
     if (!cyRef.current || elements.nodes.length === 0) {
       return;
@@ -83,7 +98,9 @@ const GraphComponent: React.FC = () => {
         {JSON.stringify(latestNodes, null, 2)}
       </pre>
     </div>
+
   );
 };
 
 export default GraphComponent;
+

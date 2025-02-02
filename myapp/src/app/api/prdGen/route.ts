@@ -82,9 +82,8 @@ async function sendPRDToNodeGen(fullResponse: string) {
       body: JSON.stringify({ fullResponse }),
     });
     const nodeGenData = await nodeGenResponse.json();
-    // console.log("nodeGenData", nodeGenData)
+    console.log("nodeGenData", nodeGenData)
     // console.log("EMITTED NODESGENERATED", nodeGenData.message)
-    eventEmitter.emit('nodesGenerated', nodeGenData.message);
     return nodeGenData.message; // Return the generated nodes
   } catch (error) {
     console.error('Error sending PRD to NodeGen:', error);
@@ -92,5 +91,3 @@ async function sendPRDToNodeGen(fullResponse: string) {
   }
 }
 
-
-export { eventEmitter };
