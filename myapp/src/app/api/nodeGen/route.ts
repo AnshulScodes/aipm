@@ -60,9 +60,6 @@ Step-by-Step Navigation:
 Define the main app flow and how users progress through the app.
 Each step should clearly outline where users can go next and what actions trigger these transitions.
 Example format (Follow this exactly):
-yaml
-Copy
-Edit
 Start
     to: Onboarding
         to: HomeScreen
@@ -95,7 +92,7 @@ Do not leave any floating nodes without a connection back to the main app flow.
 Expected Output:
 A complete text-based app flow structure that a developer can use immediately to implement navigation logic, without additional explanations or modifications. The structure should strictly follow the defined indentation style and ensure smooth transitions between all app sections.
 
-What I need the output to be is just this list of nodes and edges in a json format, all properly indented and formatted.
+What I need the output to be is just this list of nodes and edges in a json format, all properly indented and formatted. DON'T output any FeatureA, FeatureB, etc. The nodes and edges should be the actual names of the screens and features that come from the PRD.
 
 `;
 
