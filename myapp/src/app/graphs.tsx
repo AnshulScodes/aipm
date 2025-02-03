@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import mermaid from "mermaid";
 import cytoscape, { ElementsDefinition } from "cytoscape";
-
 
 const GraphComponent: React.FC = () => {
   const cyRef = useRef<HTMLDivElement | null>(null);
   const [elements, setElements] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
-  const [latestNodes, setLatestNodes] = useState<any>(null);
+  const [latestNodes, setLatestNodes] = useState<string | null>(null); // Change to string to hold raw text
 
   useEffect(() => {
     const fetchNodes = async () => {
@@ -16,69 +16,35 @@ const GraphComponent: React.FC = () => {
         }
         const data = await response.json();
         const nodes = data.message;
-        // console.log("Latest nodes data:", nodes);
         setLatestNodes(nodes);
-
-
       } catch (error) {
         console.error("Error fetching nodes:", error);
-        setLatestNodes(""); // Set empty string on error
+        setLatestNodes(null); // Set null on error
       }
     };
-  
+
     fetchNodes();
     const interval = setInterval(fetchNodes, 5000); // Poll every 5s
-  
+
     return () => clearInterval(interval);
   }, []);
 
-
-
-
-  console.log("Latest nodes data:", latestNodes);
-  const flowData = formatTextToNodes(latestNodes);
-  console.log("Formatted flow data:", flowData);
-
-  function formatTextToNodes(rawText: string | null) {
+  // Format text to extract Mermaid chart (graph TD)
+  function formatTextToMermaid(rawText: string | null) {
     if (!rawText) return "";
-    
-    let textNoThink = rawText;
-    if (rawText.includes('</think>')) {
-      textNoThink = rawText.split('</think>')[1];
-    }
-    
-    let lines = textNoThink.replace(/\n/g, "").split("  ");
-    lines = lines.map(line => line.trim()).filter(line => line);
-  
-    let formattedLines: string[] = [];
-    let indentLevel = 0;
-    let prevIndent = 0;
-  
-    for (let line of lines) {
-      let currIndent = (line.length - line.trimStart().length) / 4;
-  
-      if (currIndent > prevIndent) {
-        indentLevel++;
-      } else if (currIndent < prevIndent) {
-        indentLevel--;
-      }
-  
-      formattedLines.push("  ".repeat(indentLevel) + line.trim());
-      prevIndent = currIndent;
-  
-  
-    }
-  
-    return formattedLines.join("\n");
+    const mermaidText = rawText.split("```mermaid")[1]?.split("```")[0]; // Get text between ```mermaid
+    return mermaidText ? mermaidText.replace(/\\n/g, '\n').replace(/['+]/g, '').trim() : "";
   }
 
+  const mermaidFlowchart = formatTextToMermaid(latestNodes);
 
-
-
-
-
-
-
+  // Initialize Mermaid on the `mermaid` div after the chart string is updated
+  useEffect(() => {
+    if (mermaidFlowchart) {
+      console.log("Initializing Mermaid with:", mermaidFlowchart); // Debug the flowchart content
+      mermaid.init(undefined, '.mermaid'); // Initialize Mermaid for the chart
+    }
+  }, [mermaidFlowchart]); // Re-initialize only when flowchart changes
 
   useEffect(() => {
     if (!cyRef.current || elements.nodes.length === 0) {
@@ -127,16 +93,17 @@ const GraphComponent: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center justify-center text-gray-700 text-size-2xl">
-      <div>
-        <div ref={cyRef} style={{ width: "100%", height: "500px" }} />
-      </div>
+      <div ref={cyRef} style={{ width: "100%", height: "500px" }} />
       <h3>Latest Nodes Data:</h3>
       <pre className="bg-gray-100 p-4 rounded-lg overflow-auto max-w-full">
-        {JSON.stringify(flowData, null, 2)}
+        {JSON.stringify(latestNodes, null, 2)}
+      </pre>
+      <h3>Mermaid Flowchart:</h3>
+      <pre className="bg-gray-100 p-4 rounded-lg overflow-auto max-w-full">
+        {/* Render the Mermaid content inside a div with the `mermaid` class */}
+        <div className="mermaid">{mermaidFlowchart}</div>
       </pre>
     </div>
-
-
   );
 };
 

@@ -46,6 +46,83 @@ async function generateNodes(fullResponse: string) {
   const client = new HfInference(process.env.HUGGINGFACE_API_KEY);
 
   try {
+
+    const prompt4 = ` 
+I need you to generate a **Mermaid flowchart** that maps out every possible navigation path a user can take within this application based on the PRD: **${fullResponse}**.  
+
+### **📌 Rules & Structure:**  
+
+#### **1️⃣ Use the Correct Mermaid Syntax**
+- Start with **"graph TD;"** at the top.  
+- Each screen or feature should be a **node**, written in this format:  
+  "
+  ScreenName[Screen Label]
+
+  "
+- **Arrows ("-->")** must connect nodes to represent navigation paths.  
+- If an action or transition has a **specific name**, label it using "|Action Label|":  
+  "
+
+
+  ScreenA -->|Clicks Button| ScreenB
+  "
+- If a node links back to an existing node, **do NOT duplicate it**—just reference the existing node.  
+
+#### **2️⃣ Define a Clear User Flow**
+- The **starting point** should be "Start" or "App Entry".  
+- **Step-by-step breakdown** of how the user progresses through the app.  
+- **Group related features** logically under their parent screens.  
+- Include **all core features, settings, and any subfeatures** from the PRD.  
+
+#### **3️⃣ No Dead Ends**
+- Every screen should **connect to another screen** or return to a logical starting point.  
+- Example: If a settings menu leads to a subpage, make sure the user can return:  
+  "
+  Settings --> NotificationSettings
+  NotificationSettings --> Settings
+  "
+
+#### **4️⃣ Example of Expected Output**  
+_(Use this as a reference when generating the structure)_  
+
+"mermaid
+graph TD;
+    Start["App Launch"] -->|First-time user| Onboarding;
+    Start -->|Returning user| HomeScreen;
+
+
+    Onboarding --> HomeScreen;
+
+    HomeScreen -->|Opens Feature A| FeatureA;
+    FeatureA --> SubFeatureA1;
+    FeatureA --> SubFeatureA2;
+    SubFeatureA2 --> FeatureA;  %% Returns to FeatureA
+
+    HomeScreen -->|Opens Feature B| FeatureB;
+    FeatureB --> SubFeatureB1;
+    FeatureB --> SubFeatureB2;
+    SubFeatureB2 --> FeatureB;  %% Returns to FeatureB
+
+    HomeScreen -->|Goes to Settings| Settings;
+    Settings --> NotificationSettings;
+    NotificationSettings --> Settings; %% Returns to Settings
+
+    Settings --> HomeScreen; %% Back to HomeScreen
+"
+
+### **🔍 Important Notes for the AI:**  
+- **DO NOT** create duplicate nodes at the same level—everything must be properly nested.  
+- If a **screen reappears later**, use the same name and **connect back** instead of rewriting it.  
+- Ensure that every transition **makes sense logically** based on the PRD.  
+- **Follow the Mermaid syntax exactly**—don't add extra characters, missing arrows, or misplaced nodes.  
+
+### **💡 Expected Output Format**  
+- The output **must** be valid MermaidJS syntax so it can be copied into:  
+  - **Mermaid Live Editor:** [https://mermaid-js.github.io/mermaid-live-editor](https://mermaid-js.github.io/mermaid-live-editor)  
+  - **Markdown (.md) files with Mermaid support** (GitHub, VS Code, Obsidian).  
+  - **Any webpage using Mermaid.js.**  
+
+🚀 Generate the **fully structured Mermaid flowchart** based on the PRD, ensuring all navigation paths are correct and formatted properly.`
     // Prepare the prompt for task and feature extraction
     const prompt3 = `Generate a quick app flow in a structured, hierarchical format that clearly maps out possible navigation paths that a user can go through based off this PRD: ${fullResponse}. The output should be hierarchical, like this: ""Start
         Onboarding
@@ -74,8 +151,11 @@ async function generateNodes(fullResponse: string) {
         Settings  
             HomeScreen"
     
-    Also, make sure that the nodes are all unique and that there are no duplicate nodes at the same level. As well as that, to label arrows it should be formatted like this: "to: NodeName", and arrows will refernce nodes like this: (nodeName).
+    Also, make sure that the nodes are all unique and that there are no duplicate nodes at the same level. As well as that, label each node with the level of the node. Format each node like this: "NodeName (level)"
     `
+
+
+
 
 
 
@@ -126,7 +206,7 @@ Do not leave any floating nodes without a connection back to the main app flow.
 Expected Output:
 A complete text-based app flow structure that a developer can use immediately to implement navigation logic, without additional explanations or modifications. The structure should strictly follow the defined indentation style and ensure smooth transitions between all app sections.
 
-What I need the output to be is just this list of nodes and edges in a json format, all properly indented and formatted. DON'T output any FeatureA, FeatureB, etc. The nodes and edges should be the actual names of the screens and features that come from the PRD.
+What I need the output to be is just this list of nodes, each formatted as "NodeName (level)" and each node should be properly indented under its parent node. DON'T output any FeatureA, FeatureB, etc. The nodes and edges should be the actual names of the screens and features that come from the PRD.
 
 `;
 
@@ -140,15 +220,16 @@ What I need the output to be is just this list of nodes and edges in a json form
       //   top_p: 0.95,
       //   repetition_penalty: 1.15,
       // }
-      model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+      // model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
+      model: "meta-llama/Meta-Llama-3-8B-Instruct",
       messages: [
         {
           role: "user",
-          content: prompt3
+          content: prompt4
         }
       ],
       provider: "hf-inference",
-      max_tokens: 1024
+      max_tokens: 2048
     });
 
 
