@@ -5,7 +5,7 @@ import cytoscape, { ElementsDefinition } from "cytoscape";
 const GraphComponent: React.FC = () => {
   const cyRef = useRef<HTMLDivElement | null>(null);
   const [elements, setElements] = useState<{ nodes: any[]; edges: any[] }>({ nodes: [], edges: [] });
-  const [latestNodes, setLatestNodes] = useState<string | null>(null); // Change to string to hold raw text
+  const [latestNodes, setLatestNodes] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchNodes = async () => {
@@ -19,32 +19,30 @@ const GraphComponent: React.FC = () => {
         setLatestNodes(nodes);
       } catch (error) {
         console.error("Error fetching nodes:", error);
-        setLatestNodes(null); // Set null on error
+        setLatestNodes(null);
       }
     };
 
     fetchNodes();
-    const interval = setInterval(fetchNodes, 5000); // Poll every 5s
+    const interval = setInterval(fetchNodes, 5000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Format text to extract Mermaid chart (graph TD)
   function formatTextToMermaid(rawText: string | null) {
-    if (!rawText) return "";
-    const mermaidText = rawText.split("```mermaid")[1]?.split("```")[0]; // Get text between ```mermaid
+    if (!rawText) return "graph TD\n    Start[\"App Launch\"] -->|First-time user| Onboarding;\n    Start -->|Returning user| logged_in;\n    logged_in --> HomeScreen;";
+    const mermaidText = rawText.split("```mermaid")[1]?.split("```")[0];
     return mermaidText ? mermaidText.replace(/\\n/g, '\n').replace(/['+]/g, '').trim() : "";
-  }
 
+  }
+  console.log("latestNodes", latestNodes)
   const mermaidFlowchart = formatTextToMermaid(latestNodes);
 
-  // Initialize Mermaid on the `mermaid` div after the chart string is updated
   useEffect(() => {
     if (mermaidFlowchart) {
-      console.log("Initializing Mermaid with:", mermaidFlowchart); // Debug the flowchart content
-      mermaid.init(undefined, '.mermaid'); // Initialize Mermaid for the chart
+      mermaid.init(undefined, '.mermaid');
     }
-  }, [mermaidFlowchart]); // Re-initialize only when flowchart changes
+  }, [mermaidFlowchart]);
 
   useEffect(() => {
     if (!cyRef.current || elements.nodes.length === 0) {
@@ -100,7 +98,6 @@ const GraphComponent: React.FC = () => {
       </pre>
       <h3>Mermaid Flowchart:</h3>
       <pre className="bg-gray-100 p-4 rounded-lg overflow-auto max-w-full">
-        {/* Render the Mermaid content inside a div with the `mermaid` class */}
         <div className="mermaid">{mermaidFlowchart}</div>
       </pre>
     </div>
