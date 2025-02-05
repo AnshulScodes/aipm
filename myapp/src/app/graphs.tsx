@@ -79,7 +79,7 @@ const GraphComponent: React.FC = () => {
       >
         {!mermaidOutput && (
           <div className="h-full flex items-center justify-center text-slate-400">
-            Generated flowchart will appear here
+            Generated flowchart will appear here SKIBIDI SIGMA THIS IS FOR THE GIT COMMIT
           </div>
         )}
       </div>
