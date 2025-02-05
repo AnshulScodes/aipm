@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import mermaid from "mermaid";
+import svgPanZoom from "svg-pan-zoom";
 
 const GraphComponent: React.FC = () => {
   const [mermaidOutput, setMermaidOutput] = useState<string>("");
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const svgRef = useRef<SVGSVGElement | null>(null);
 
   const fetchData = async () => {
     try {
@@ -46,6 +48,16 @@ const GraphComponent: React.FC = () => {
         const { svg } = await mermaid.render("flowchart", mermaidOutput);
         if (containerRef.current) {
           containerRef.current.innerHTML = svg; // Set the rendered SVG
+          const svgElement = containerRef.current.querySelector('svg');
+          if (svgElement) {
+            svgRef.current = svgElement;
+            svgPanZoom(svgElement, {
+              zoomEnabled: true,
+              controlIconsEnabled: true,
+              fit: true,
+              center: true,
+            });
+          }
         }
       } catch (error) {
         console.error("Failed to render flowchart:", error);
