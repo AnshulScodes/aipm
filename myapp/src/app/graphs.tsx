@@ -32,11 +32,23 @@ const GraphComponent: React.FC = () => {
   function formatTextToMermaid(rawText: string | null) {
     if (!rawText) return "graph TD\n    Start[\"App Launch\"] -->|First-time user| Onboarding;\n    Start -->|Returning user| logged_in;\n    logged_in --> HomeScreen;";
     const mermaidText = rawText.split("```mermaid")[1]?.split("```")[0];
-    return mermaidText ? mermaidText.replace(/\\n/g, '\n').replace(/['+]/g, '').trim() : "";
+    const lines = mermaidText?.split("\n");
+    const formattedLines = lines?.map(line => {
+      // if (line.endsWith("|;")) {
+      //   //go to the character before the ; and add the replacement word
+      //   const index = line.lastIndexOf(";");
+      //   return line.slice(0, index) + " Replacement" + line.slice(index + 1);
+      // }
+      // return line;
+
+    });
+    return formattedLines?.join("\n");
+
 
   }
-  console.log("latestNodes", latestNodes)
-  const mermaidFlowchart = formatTextToMermaid(latestNodes);
+  const mermaidFlowchart = latestNodes?.split("```")[1]?.split("```")[0];
+  console.log("mermaidFlowchart", mermaidFlowchart)
+
 
   useEffect(() => {
     if (mermaidFlowchart) {
@@ -101,6 +113,7 @@ const GraphComponent: React.FC = () => {
         <div className="mermaid">{mermaidFlowchart}</div>
       </pre>
     </div>
+
   );
 };
 
