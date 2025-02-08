@@ -23,7 +23,7 @@ export async function POST(req: Request) {
           // model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
           // model: "meta-llama/Meta-Llama-3-70B-Instruct",
           // model: "HuggingFaceH4/zephyr-7b-alpha",
-          model: "meta-llama/Meta-Llama-3-8B-Instruct",
+          model: "deepseek-ai/DeepSeek-R1-Distill-Qwen-32B",
           messages,
           parameters: {
             max_new_tokens: 2048,
