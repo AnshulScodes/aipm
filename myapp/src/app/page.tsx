@@ -33,7 +33,7 @@ Explain the app in simple, clear language for non-technical stakeholders. Includ
 Features/Requirements
 List out all the app's functionalities in detail. Include core features, optional features, and how each should behave.
 User Flows
-Map out common user journeys step-by-step, showing how users interact with the app to achieve their goals. Keep it simple yet thorough.
+Map out common user journeys step-by-step, showing how users interact with the app to achieve their goals. Keepit simple yet thorough.
 Non-Functional Requirements
 Detail performance expectations, security needs, scalability requirements, compliance standards, and any other technical constraints.
 Page Designs for UI/UX Designers
